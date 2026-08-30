@@ -3,14 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>DocVault – Free Document & Large File Upload</title>
-  <meta name="description" content="Free, beautiful website to upload documents and large files with preview, QR, ZIP and more." />
+  <title>DocVault – Secure File Share</title>
+  <meta name="description" content="Admin uploads, public downloads. History on every device." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
   <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
   <div class="bg-shapes">
@@ -19,7 +20,7 @@
     <div class="shape shape-3"></div>
   </div>
 
-  <button class="theme-toggle" id="themeToggle" title="Toggle light/dark mode" aria-label="Toggle theme">
+  <button class="theme-toggle" id="themeToggle" title="Toggle theme" aria-label="Toggle theme">
     <svg class="icon-sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
       <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
       <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
@@ -41,69 +42,83 @@
       </svg>
       <span>DocVault</span>
     </div>
-    <p class="tagline">Upload documents & large files — free forever</p>
+    <p class="tagline">Admin uploads • Anyone can download</p>
   </header>
 
   <main class="container">
-    <div class="options-bar">
-      <label class="option-item">
-        <input type="checkbox" id="usePassword" />
-        <span>Password</span>
-      </label>
-      <label class="option-item">
-        <input type="checkbox" id="zipMultiple" checked />
-        <span>ZIP multiple</span>
-      </label>
-      <label class="option-item">
-        <input type="checkbox" id="folderMode" />
-        <span>Folder upload</span>
-      </label>
-      <div class="option-item expiry-select">
-        <span>Expiry:</span>
-        <select id="expirySelect">
-          <option value="never">Never</option>
-          <option value="1">1 day</option>
-          <option value="7" selected>7 days</option>
-          <option value="30">30 days</option>
-        </select>
-      </div>
+    <div class="admin-bar">
+      <span id="adminStatus" class="admin-status">Public view (download only)</span>
+      <button class="btn-sm" id="adminLoginBtn">Admin Login</button>
+      <button class="btn-sm secondary" id="adminLogoutBtn" hidden>Logout</button>
     </div>
 
-    <div class="password-row" id="passwordRow" hidden>
-      <input type="password" id="filePassword" class="password-input" placeholder="Enter password (min 4 characters)" />
+    <div class="login-box" id="loginBox" hidden>
+      <input type="password" id="adminPasswordInput" class="password-input" placeholder="Admin password" />
+      <button class="btn-primary" id="adminLoginSubmit">Login</button>
+      <p class="login-error" id="loginError" hidden>Wrong password</p>
     </div>
 
-    <section class="upload-card" id="dropZone">
-      <div class="upload-icon">
-        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-          <polyline points="17 8 12 3 7 8"/>
-          <line x1="12" y1="3" x2="12" y2="15"/>
-        </svg>
+    <div id="adminOnlyArea" hidden>
+      <div class="options-bar">
+        <label class="option-item">
+          <input type="checkbox" id="usePassword" />
+          <span>Password</span>
+        </label>
+        <label class="option-item">
+          <input type="checkbox" id="zipMultiple" checked />
+          <span>ZIP multiple</span>
+        </label>
+        <label class="option-item">
+          <input type="checkbox" id="folderMode" />
+          <span>Folder upload</span>
+        </label>
+        <div class="option-item expiry-select">
+          <span>Expiry:</span>
+          <select id="expirySelect">
+            <option value="never">Never</option>
+            <option value="1">1 day</option>
+            <option value="7" selected>7 days</option>
+            <option value="30">30 days</option>
+          </select>
+        </div>
       </div>
-      <h2>Drop files or folders here</h2>
-      <p>or click to browse • Any file type supported</p>
-      <p class="size-hint">Large files (multi-GB) • Free • No account needed</p>
-      <input type="file" id="fileInput" multiple hidden />
-      <input type="file" id="folderInput" webkitdirectory directory multiple hidden />
-      <button class="btn-primary" id="browseBtn">Choose Files</button>
-    </section>
 
-    <section class="files-section" id="filesSection" hidden>
+      <div class="password-row" id="passwordRow" hidden>
+        <input type="password" id="filePassword" class="password-input" placeholder="File password (min 4 characters)" />
+      </div>
+
+      <section class="upload-card" id="dropZone">
+        <div class="upload-icon">
+          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+        </div>
+        <h2>Drop files or folders here</h2>
+        <p>or click to browse • Admin upload only</p>
+        <p class="size-hint">Large files via GoFile • Saved to history</p>
+        <input type="file" id="fileInput" multiple hidden />
+        <input type="file" id="folderInput" webkitdirectory directory multiple hidden />
+        <button class="btn-primary" id="browseBtn">Choose Files</button>
+      </section>
+
+      <section class="files-section" id="filesSection" hidden>
+        <div class="section-header">
+          <h3>Just uploaded</h3>
+          <button class="btn-text" id="clearBtn">Clear</button>
+        </div>
+        <div class="files-list" id="filesList"></div>
+      </section>
+    </div>
+
+    <section class="files-section" id="historySection">
       <div class="section-header">
-        <h3>Your Uploads</h3>
-        <button class="btn-text" id="clearBtn">Clear list</button>
+        <h3>Available Files (anyone can download)</h3>
+        <button class="btn-text" id="refreshHistoryBtn">Refresh</button>
       </div>
-      <div class="files-list" id="filesList"></div>
-    </section>
-
-    <section class="features">
-      <div class="feature"><div class="feature-icon">📄</div><h4>All Documents</h4><p>PDF, Word, Excel, images, videos…</p></div>
-      <div class="feature"><div class="feature-icon">📦</div><h4>Large Files</h4><p>Multi-GB support via GoFile</p></div>
-      <div class="feature"><div class="feature-icon">📱</div><h4>QR Codes</h4><p>Scan to download on phone</p></div>
-      <div class="feature"><div class="feature-icon">👁️</div><h4>Preview</h4><p>Images & PDFs inside the page</p></div>
-      <div class="feature"><div class="feature-icon">🗜️</div><h4>Auto ZIP</h4><p>Multiple files → one archive</p></div>
-      <div class="feature"><div class="feature-icon">📁</div><h4>Folder Upload</h4><p>Upload whole folders at once</p></div>
+      <div id="historyEmpty" class="history-empty">No files yet.</div>
+      <div class="files-list" id="historyList"></div>
     </section>
   </main>
 
@@ -116,7 +131,7 @@
   </div>
 
   <footer class="footer">
-    <p>Powered by GoFile • Free & open • Host on GitHub Pages</p>
+    <p>Admin upload only • Public download • GoFile + Supabase</p>
   </footer>
 
   <script src="app.js"></script>
