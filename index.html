@@ -1,1 +1,1637 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FileVault • Permanent Free Cloud</title>
+  <meta name="description" content="Upload documents & large files for free. Powered by GitHub + Google Drive. Files never delete. Access from any device." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <style>
+    /* ========== THEME VARIABLES ========== */
+    :root, [data-theme="dark"] {
+      --bg-primary: #0a0a0f;
+      --bg-secondary: #12121a;
+      --bg-card: rgba(22, 22, 32, 0.75);
+      --bg-glass: rgba(255, 255, 255, 0.04);
+      --bg-input: rgba(255, 255, 255, 0.06);
+      --border: rgba(255, 255, 255, 0.08);
+      --border-hover: rgba(255, 255, 255, 0.16);
+      --text-primary: #f4f4f5;
+      --text-secondary: #a1a1aa;
+      --text-muted: #71717a;
+      --accent: #8b5cf6;
+      --accent-2: #06b6d4;
+      --accent-3: #22c55e;
+      --accent-soft: rgba(139, 92, 246, 0.15);
+      --accent-gradient: linear-gradient(135deg, #8b5cf6 0%, #06b6d4 50%, #22c55e 100%);
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --nav-bg: rgba(10, 10, 15, 0.85);
+      --mesh-1: rgba(139, 92, 246, 0.15);
+      --mesh-2: rgba(6, 182, 212, 0.12);
+      --shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      --code-bg: #0d0d12;
+      --toast-bg: #1a1a24;
+      --radius: 16px;
+      --radius-sm: 10px;
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    [data-theme="light"] {
+      --bg-primary: #f8fafc;
+      --bg-secondary: #f1f5f9;
+      --bg-card: rgba(255, 255, 255, 0.85);
+      --bg-glass: rgba(0, 0, 0, 0.03);
+      --bg-input: rgba(0, 0, 0, 0.04);
+      --border: rgba(0, 0, 0, 0.08);
+      --border-hover: rgba(0, 0, 0, 0.15);
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #94a3b8;
+      --accent: #7c3aed;
+      --accent-2: #0891b2;
+      --accent-3: #16a34a;
+      --accent-soft: rgba(124, 58, 237, 0.12);
+      --accent-gradient: linear-gradient(135deg, #7c3aed 0%, #0891b2 50%, #16a34a 100%);
+      --danger: #dc2626;
+      --warning: #d97706;
+      --nav-bg: rgba(248, 250, 252, 0.9);
+      --mesh-1: rgba(124, 58, 237, 0.1);
+      --mesh-2: rgba(8, 145, 178, 0.08);
+      --shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.12);
+      --code-bg: #1e293b;
+      --toast-bg: #1e293b;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+      line-height: 1.6;
+      transition: background 0.35s ease, color 0.35s ease;
+    }
+
+    /* Animated background */
+    .bg-mesh {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .bg-mesh::before {
+      content: '';
+      position: absolute;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, var(--mesh-1) 0%, transparent 70%);
+      top: -200px;
+      left: -100px;
+      animation: float 20s ease-in-out infinite;
+    }
+
+    .bg-mesh::after {
+      content: '';
+      position: absolute;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, var(--mesh-2) 0%, transparent 70%);
+      bottom: -150px;
+      right: -100px;
+      animation: float 25s ease-in-out infinite reverse;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      33% { transform: translate(30px, -30px) scale(1.05); }
+      66% { transform: translate(-20px, 20px) scale(0.95); }
+    }
+
+    /* Navigation */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      background: var(--nav-bg);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      transition: background 0.35s ease, border-color 0.35s ease;
+    }
+
+    .nav-inner {
+      max-width: 1280px;
+      margin: 0 auto;
+      height: 70px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 700;
+      font-size: 1.35rem;
+      letter-spacing: -0.02em;
+      text-decoration: none;
+      color: var(--text-primary);
+    }
+
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      background: var(--accent-gradient);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      color: white;
+      box-shadow: 0 8px 20px rgba(139, 92, 246, 0.3);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .nav-link {
+      padding: 8px 14px;
+      border-radius: 8px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: var(--transition);
+    }
+
+    .nav-link:hover {
+      color: var(--text-primary);
+      background: var(--bg-glass);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 18px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      border: none;
+      cursor: pointer;
+      transition: var(--transition);
+      text-decoration: none;
+      font-family: inherit;
+    }
+
+    .btn-primary {
+      background: var(--accent-gradient);
+      color: white;
+      box-shadow: 0 4px 15px rgba(139, 92, 246, 0.35);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(139, 92, 246, 0.45);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text-secondary);
+      border: 1px solid var(--border);
+    }
+
+    .btn-ghost:hover {
+      border-color: var(--border-hover);
+      color: var(--text-primary);
+      background: var(--bg-glass);
+    }
+
+    .btn-sm {
+      padding: 8px 14px;
+      font-size: 0.85rem;
+      border-radius: 10px;
+    }
+
+    /* Theme Toggle */
+    .theme-toggle {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--bg-glass);
+      color: var(--text-secondary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .theme-toggle:hover {
+      border-color: var(--border-hover);
+      color: var(--text-primary);
+      background: var(--accent-soft);
+    }
+
+    .theme-toggle .icon-sun,
+    .theme-toggle .icon-moon {
+      position: absolute;
+      transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+    }
+
+    [data-theme="dark"] .theme-toggle .icon-sun {
+      transform: rotate(90deg) scale(0);
+      opacity: 0;
+    }
+
+    [data-theme="dark"] .theme-toggle .icon-moon {
+      transform: rotate(0) scale(1);
+      opacity: 1;
+    }
+
+    [data-theme="light"] .theme-toggle .icon-sun {
+      transform: rotate(0) scale(1);
+      opacity: 1;
+    }
+
+    [data-theme="light"] .theme-toggle .icon-moon {
+      transform: rotate(-90deg) scale(0);
+      opacity: 0;
+    }
+
+    /* Hero */
+    .hero {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 70px 24px 50px;
+      text-align: center;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      background: var(--accent-soft);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      border-radius: 100px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--accent);
+      margin-bottom: 24px;
+      animation: fadeInUp 0.6s ease;
+    }
+
+    [data-theme="light"] .badge {
+      border-color: rgba(124, 58, 237, 0.25);
+    }
+
+    .badge i { color: var(--accent-3); }
+
+    h1 {
+      font-size: clamp(2.4rem, 5.5vw, 3.8rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      margin-bottom: 18px;
+      animation: fadeInUp 0.6s ease 0.1s both;
+    }
+
+    h1 .gradient {
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-sub {
+      font-size: 1.15rem;
+      color: var(--text-secondary);
+      max-width: 600px;
+      margin: 0 auto 36px;
+      animation: fadeInUp 0.6s ease 0.2s both;
+    }
+
+    .hero-cta {
+      display: flex;
+      gap: 14px;
+      justify-content: center;
+      flex-wrap: wrap;
+      animation: fadeInUp 0.6s ease 0.3s both;
+    }
+
+    .stats {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      margin-top: 50px;
+      flex-wrap: wrap;
+      animation: fadeInUp 0.6s ease 0.4s both;
+    }
+
+    .stat { text-align: center; }
+
+    .stat-value {
+      font-size: 1.7rem;
+      font-weight: 700;
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .stat-label {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Main App */
+    .app-section {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 24px 70px;
+    }
+
+    .app-grid {
+      display: grid;
+      grid-template-columns: 1fr 360px;
+      gap: 22px;
+    }
+
+    @media (max-width: 1024px) {
+      .app-grid { grid-template-columns: 1fr; }
+    }
+
+    .upload-card, .side-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      transition: background 0.35s ease, border-color 0.35s ease;
+    }
+
+    .upload-zone {
+      border: 2px dashed rgba(139, 92, 246, 0.35);
+      border-radius: var(--radius);
+      padding: 50px 32px;
+      text-align: center;
+      background: var(--accent-soft);
+      transition: var(--transition);
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+
+    [data-theme="light"] .upload-zone {
+      border-color: rgba(124, 58, 237, 0.3);
+    }
+
+    .upload-zone:hover,
+    .upload-zone.dragover {
+      border-color: var(--accent);
+      background: rgba(139, 92, 246, 0.1);
+      transform: scale(1.008);
+    }
+
+    .upload-icon {
+      width: 68px;
+      height: 68px;
+      margin: 0 auto 18px;
+      background: var(--accent-gradient);
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.7rem;
+      color: white;
+      box-shadow: 0 12px 28px rgba(139, 92, 246, 0.3);
+    }
+
+    .upload-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .upload-desc {
+      color: var(--text-secondary);
+      font-size: 0.92rem;
+      margin-bottom: 22px;
+    }
+
+    .upload-hint {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 14px;
+    }
+
+    #fileInput { display: none; }
+
+    .progress-bar {
+      height: 4px;
+      background: rgba(128, 128, 128, 0.15);
+      border-radius: 2px;
+      margin-top: 14px;
+      overflow: hidden;
+      display: none;
+    }
+
+    .progress-bar.active { display: block; }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--accent-gradient);
+      width: 0%;
+      transition: width 0.25s ease;
+      border-radius: 2px;
+    }
+
+    /* Tabs for local files vs permanent links */
+    .tabs {
+      display: flex;
+      gap: 6px;
+      margin: 28px 0 18px;
+      background: var(--bg-glass);
+      padding: 5px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 10px 14px;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      font-weight: 600;
+      font-size: 0.88rem;
+      border-radius: 9px;
+      cursor: pointer;
+      transition: var(--transition);
+      font-family: inherit;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-primary);
+    }
+
+    .tab-btn.active {
+      background: var(--bg-card);
+      color: var(--text-primary);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      border: 1px solid var(--border);
+    }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    .files-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .files-header h2 {
+      font-size: 1.05rem;
+      font-weight: 600;
+    }
+
+    .file-count {
+      background: var(--accent-soft);
+      color: var(--accent);
+      padding: 4px 11px;
+      border-radius: 100px;
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+
+    .file-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 380px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .file-list::-webkit-scrollbar { width: 5px; }
+    .file-list::-webkit-scrollbar-track { background: transparent; }
+    .file-list::-webkit-scrollbar-thumb {
+      background: rgba(128, 128, 128, 0.25);
+      border-radius: 3px;
+    }
+
+    .file-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 14px;
+      background: var(--bg-glass);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      transition: var(--transition);
+      animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(-8px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    .file-item:hover {
+      border-color: var(--border-hover);
+      background: rgba(128, 128, 128, 0.06);
+    }
+
+    .file-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.15rem;
+      flex-shrink: 0;
+    }
+
+    .file-icon.pdf { background: rgba(239, 68, 68, 0.12); color: #f87171; }
+    .file-icon.doc { background: rgba(59, 130, 246, 0.12); color: #60a5fa; }
+    .file-icon.img { background: rgba(34, 197, 94, 0.12); color: #4ade80; }
+    .file-icon.video { background: rgba(168, 85, 247, 0.12); color: #c084fc; }
+    .file-icon.zip { background: rgba(245, 158, 11, 0.12); color: #fbbf24; }
+    .file-icon.link { background: rgba(6, 182, 212, 0.12); color: #22d3ee; }
+    .file-icon.other { background: rgba(161, 161, 170, 0.12); color: #a1a1aa; }
+
+    .file-info { flex: 1; min-width: 0; }
+
+    .file-name {
+      font-weight: 500;
+      font-size: 0.92rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .file-meta {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .file-actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    .action-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-secondary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition);
+      font-size: 0.85rem;
+    }
+
+    .action-btn:hover {
+      background: var(--bg-glass);
+      color: var(--text-primary);
+      border-color: var(--border-hover);
+    }
+
+    .action-btn.download:hover {
+      color: var(--accent-3);
+      border-color: rgba(34, 197, 94, 0.4);
+    }
+
+    .action-btn.open:hover {
+      color: var(--accent-2);
+      border-color: rgba(6, 182, 212, 0.4);
+    }
+
+    .action-btn.delete:hover {
+      color: var(--danger);
+      border-color: rgba(239, 68, 68, 0.4);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 36px 16px;
+      color: var(--text-muted);
+    }
+
+    .empty-state i {
+      font-size: 2.2rem;
+      margin-bottom: 10px;
+      opacity: 0.4;
+    }
+
+    /* Permanent Links Form */
+    .link-form {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 20px;
+      padding: 18px;
+      background: var(--bg-glass);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+    }
+
+    .form-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    @media (max-width: 600px) {
+      .form-row { flex-direction: column; }
+    }
+
+    .form-group {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .form-group label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .form-group input,
+    .form-group select {
+      padding: 11px 14px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--bg-input);
+      color: var(--text-primary);
+      font-size: 0.9rem;
+      font-family: inherit;
+      transition: var(--transition);
+      outline: none;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-soft);
+    }
+
+    .form-group input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .side-card h3 {
+      font-size: 0.98rem;
+      font-weight: 600;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+
+    .side-card h3 i { color: var(--accent); }
+
+    .storage-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 11px;
+      border-radius: 10px;
+      background: var(--bg-glass);
+      margin-bottom: 8px;
+      border: 1px solid transparent;
+      transition: var(--transition);
+    }
+
+    .storage-item:hover { border-color: var(--border); }
+
+    .storage-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.05rem;
+    }
+
+    .storage-icon.github { background: rgba(128, 128, 128, 0.12); color: var(--text-primary); }
+    .storage-icon.gdrive { background: rgba(66, 133, 244, 0.12); color: #4285f4; }
+
+    .storage-name { font-weight: 500; font-size: 0.88rem; }
+    .storage-status { font-size: 0.72rem; color: var(--accent-3); }
+
+    .guide-step {
+      display: flex;
+      gap: 11px;
+      margin-bottom: 14px;
+    }
+
+    .step-num {
+      width: 26px;
+      height: 26px;
+      border-radius: 7px;
+      background: var(--accent-gradient);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: white;
+      flex-shrink: 0;
+    }
+
+    .step-text {
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+    }
+
+    .step-text strong { color: var(--text-primary); }
+
+    /* Features */
+    .features {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 70px 24px;
+    }
+
+    .section-title {
+      text-align: center;
+      margin-bottom: 42px;
+    }
+
+    .section-title h2 {
+      font-size: 1.9rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .section-title p {
+      color: var(--text-secondary);
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+      gap: 18px;
+    }
+
+    .feature-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 26px;
+      transition: var(--transition);
+      backdrop-filter: blur(12px);
+    }
+
+    .feature-card:hover {
+      border-color: var(--border-hover);
+      transform: translateY(-3px);
+      box-shadow: var(--shadow);
+    }
+
+    .feature-icon {
+      width: 46px;
+      height: 46px;
+      border-radius: 12px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      margin-bottom: 14px;
+    }
+
+    .feature-card h3 {
+      font-size: 1.05rem;
+      margin-bottom: 6px;
+    }
+
+    .feature-card p {
+      color: var(--text-secondary);
+      font-size: 0.88rem;
+    }
+
+    /* Setup */
+    .setup {
+      max-width: 880px;
+      margin: 0 auto;
+      padding: 0 24px 90px;
+    }
+
+    .setup-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 36px;
+      backdrop-filter: blur(12px);
+    }
+
+    .setup-card h2 {
+      font-size: 1.4rem;
+      margin-bottom: 6px;
+    }
+
+    .setup-card > p {
+      color: var(--text-secondary);
+      margin-bottom: 28px;
+    }
+
+    .code-block {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+      overflow-x: auto;
+      margin: 14px 0;
+      position: relative;
+      color: #a5b4fc;
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      padding: 5px 11px;
+      font-size: 0.72rem;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 6px;
+      color: #a1a1aa;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .copy-btn:hover {
+      background: rgba(255, 255, 255, 0.12);
+      color: white;
+    }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 36px 24px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.88rem;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      background: var(--toast-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      box-shadow: var(--shadow);
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 1000;
+      color: #f4f4f5;
+      max-width: 340px;
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .toast.success i { color: #22c55e; }
+    .toast.error i { color: #ef4444; }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      .hero { padding: 40px 16px 30px; }
+      .stats { gap: 22px; }
+      .nav-links .nav-link { display: none; }
+      .upload-zone { padding: 36px 18px; }
+      .setup-card { padding: 22px; }
+      .form-actions { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-mesh"></div>
+
+  <!-- Navigation -->
+  <nav>
+    <div class="nav-inner">
+      <a href="#" class="logo">
+        <div class="logo-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+        FileVault
+      </a>
+      <div class="nav-links">
+        <a href="#app" class="nav-link">Vault</a>
+        <a href="#features" class="nav-link">Features</a>
+        <a href="#setup" class="nav-link">Setup</a>
+        <button class="theme-toggle" id="themeToggle" title="Toggle light/dark mode" aria-label="Toggle theme">
+          <i class="fas fa-sun icon-sun"></i>
+          <i class="fas fa-moon icon-moon"></i>
+        </button>
+        <a href="https://github.com" target="_blank" rel="noopener" class="btn btn-ghost btn-sm">
+          <i class="fab fa-github"></i> GitHub
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="badge">
+      <i class="fas fa-check-circle"></i>
+      100% Free • Files Never Delete • Multi-Device
+    </div>
+    <h1>
+      Your Permanent<br />
+      <span class="gradient">Cloud File Vault</span>
+    </h1>
+    <p class="hero-sub">
+      Upload documents & large files for free.
+      Powered by <strong>GitHub</strong> + <strong>Google Drive</strong>.
+      Save permanent links. Access from any device. Forever.
+    </p>
+    <div class="hero-cta">
+      <a href="#app" class="btn btn-primary">
+        <i class="fas fa-upload"></i> Open Vault
+      </a>
+      <a href="#setup" class="btn btn-ghost">
+        <i class="fas fa-book"></i> How it Works
+      </a>
+    </div>
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-value">∞</div>
+        <div class="stat-label">Storage</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">0$</div>
+        <div class="stat-label">Forever Free</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">100%</div>
+        <div class="stat-label">Never Deleted</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">Any</div>
+        <div class="stat-label">Device</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main App -->
+  <section class="app-section" id="app">
+    <div class="app-grid">
+      <!-- Main Card -->
+      <div class="upload-card">
+        <!-- Upload Zone -->
+        <div class="upload-zone" id="uploadZone">
+          <div class="upload-icon">
+            <i class="fas fa-cloud-upload-alt"></i>
+          </div>
+          <div class="upload-title">Drop files here or click to browse</div>
+          <div class="upload-desc">
+            Documents, PDFs, images, videos, ZIPs — prepare for GitHub / Drive
+          </div>
+          <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
+            <i class="fas fa-folder-open"></i> Choose Files
+          </button>
+          <div class="upload-hint">
+            Local preview only • Paste permanent GitHub/Drive links below to keep them forever
+          </div>
+          <div class="progress-bar" id="progressBar">
+            <div class="progress-fill" id="progressFill"></div>
+          </div>
+          <input type="file" id="fileInput" multiple />
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+          <button class="tab-btn active" data-tab="local" onclick="switchTab('local')">
+            <i class="fas fa-folder"></i> Local Files
+          </button>
+          <button class="tab-btn" data-tab="links" onclick="switchTab('links')">
+            <i class="fas fa-link"></i> Permanent Links
+          </button>
+        </div>
+
+        <!-- Local Files Panel -->
+        <div class="tab-panel active" id="panel-local">
+          <div class="files-header">
+            <h2>Your Files</h2>
+            <span class="file-count" id="fileCount">0 files</span>
+          </div>
+          <div class="file-list" id="fileList">
+            <div class="empty-state" id="emptyState">
+              <i class="fas fa-folder-open"></i>
+              <p>No files yet. Upload something to preview!</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Permanent Links Panel -->
+        <div class="tab-panel" id="panel-links">
+          <div class="link-form">
+            <div class="form-row">
+              <div class="form-group" style="flex: 2;">
+                <label>File Name</label>
+                <input type="text" id="linkName" placeholder="e.g. Project Report.pdf" />
+              </div>
+              <div class="form-group">
+                <label>Source</label>
+                <select id="linkSource">
+                  <option value="github">GitHub</option>
+                  <option value="gdrive">Google Drive</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Permanent Download URL</label>
+              <input type="url" id="linkUrl" placeholder="https://github.com/.../releases/download/... or Drive link" />
+            </div>
+            <div class="form-group">
+              <label>Notes (optional)</label>
+              <input type="text" id="linkNotes" placeholder="Version, date, or short description" />
+            </div>
+            <div class="form-actions">
+              <button class="btn btn-primary" onclick="addPermanentLink()">
+                <i class="fas fa-plus"></i> Add Permanent Link
+              </button>
+              <button class="btn btn-ghost btn-sm" onclick="clearLinkForm()">
+                Clear
+              </button>
+            </div>
+          </div>
+
+          <div class="files-header">
+            <h2>Saved Permanent Links</h2>
+            <span class="file-count" id="linkCount">0 links</span>
+          </div>
+          <div class="file-list" id="linkList">
+            <div class="empty-state" id="linkEmpty">
+              <i class="fas fa-link"></i>
+              <p>No permanent links yet.<br />Paste a GitHub Release or Google Drive link above.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar -->
+      <div class="sidebar">
+        <div class="side-card">
+          <h3><i class="fas fa-database"></i> Storage Backends</h3>
+          <div class="storage-item">
+            <div class="storage-icon github"><i class="fab fa-github"></i></div>
+            <div>
+              <div class="storage-name">GitHub Releases</div>
+              <div class="storage-status">● Permanent • up to 2 GB</div>
+            </div>
+          </div>
+          <div class="storage-item">
+            <div class="storage-icon gdrive"><i class="fab fa-google-drive"></i></div>
+            <div>
+              <div class="storage-name">Google Drive</div>
+              <div class="storage-status">● 15 GB free • Shareable</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="side-card">
+          <h3><i class="fas fa-bolt"></i> Quick Flow</h3>
+          <div class="guide-step">
+            <div class="step-num">1</div>
+            <div class="step-text"><strong>Upload</strong> to GitHub Release or Drive</div>
+          </div>
+          <div class="guide-step">
+            <div class="step-num">2</div>
+            <div class="step-text"><strong>Copy</strong> the permanent download URL</div>
+          </div>
+          <div class="guide-step">
+            <div class="step-num">3</div>
+            <div class="step-text"><strong>Paste</strong> it in “Permanent Links” tab</div>
+          </div>
+          <div class="guide-step">
+            <div class="step-num">4</div>
+            <div class="step-text"><strong>Access</strong> from any device forever</div>
+          </div>
+        </div>
+
+        <div class="side-card">
+          <h3><i class="fas fa-shield-alt"></i> Why Permanent?</h3>
+          <p style="font-size: 0.88rem; color: var(--text-secondary);">
+            GitHub Releases never auto-delete. Google Drive shared links stay active as long as your account exists. Your link list is saved in this browser (and you can re-add on any device).
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="features" id="features">
+    <div class="section-title">
+      <h2>Built for real use</h2>
+      <p>Everything you need to keep files safe, shareable and permanent — completely free.</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon"><i class="fas fa-infinity"></i></div>
+        <h3>Never Deletes</h3>
+        <p>Files on GitHub Releases or Drive stay forever. No 30-day expiry.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon"><i class="fas fa-mobile-alt"></i></div>
+        <h3>Any Device</h3>
+        <p>Open this site from phone or laptop. Same permanent links everywhere.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon"><i class="fas fa-link"></i></div>
+        <h3>Link Manager</h3>
+        <p>Save GitHub & Drive URLs in one place. Open or copy anytime.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon"><i class="fas fa-moon"></i></div>
+        <h3>Light & Dark</h3>
+        <p>Beautiful theme toggle. Your preference is remembered.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon"><i class="fas fa-file-alt"></i></div>
+        <h3>Docs & Large Files</h3>
+        <p>PDFs, Word, videos, ZIPs — GitHub supports up to 2 GB per file.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon"><i class="fas fa-rocket"></i></div>
+        <h3>Zero Cost</h3>
+        <p>GitHub free • Drive 15 GB free • This site free. No premium.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Setup Guide -->
+  <section class="setup" id="setup">
+    <div class="setup-card">
+      <h2>How to make this permanent (5 minutes)</h2>
+      <p>Follow once. After that your files and this vault live forever for free.</p>
+
+      <h3 style="margin: 24px 0 12px; font-size: 1.05rem;">
+        <i class="fab fa-github" style="margin-right: 8px;"></i>
+        Method 1 — GitHub Releases (Best)
+      </h3>
+      <div class="guide-step">
+        <div class="step-num">1</div>
+        <div class="step-text">Create free GitHub account → New repository</div>
+      </div>
+      <div class="guide-step">
+        <div class="step-num">2</div>
+        <div class="step-text">Go to <strong>Releases</strong> → Create release → Upload files (up to 2 GB each)</div>
+      </div>
+      <div class="guide-step">
+        <div class="step-num">3</div>
+        <div class="step-text">Copy the download URL → paste it in the <strong>Permanent Links</strong> tab</div>
+      </div>
+      <div class="guide-step">
+        <div class="step-num">4</div>
+        <div class="step-text">Host this website on <strong>GitHub Pages</strong> so you can open it from any device</div>
+      </div>
+
+      <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <code># Push this website to your repo:
+git init
+git add .
+git commit -m "FileVault website"
+git branch -M main
+git remote add origin https://github.com/YOUR_USERNAME/filevault.git
+git push -u origin main
+
+# Then: Settings → Pages → Deploy from main branch</code>
+      </div>
+
+      <h3 style="margin: 28px 0 12px; font-size: 1.05rem;">
+        <i class="fab fa-google-drive" style="color: #4285f4; margin-right: 8px;"></i>
+        Method 2 — Google Drive
+      </h3>
+      <div class="guide-step">
+        <div class="step-num">1</div>
+        <div class="step-text">Upload files to Google Drive</div>
+      </div>
+      <div class="guide-step">
+        <div class="step-num">2</div>
+        <div class="step-text">Right-click → Share → Anyone with the link → Copy link</div>
+      </div>
+      <div class="guide-step">
+        <div class="step-num">3</div>
+        <div class="step-text">Paste the link into Permanent Links tab (choose “Google Drive”)</div>
+      </div>
+
+      <h3 style="margin: 28px 0 12px; font-size: 1.05rem;">
+        <i class="fas fa-magic" style="color: var(--accent); margin-right: 8px;"></i>
+        Pro Tip
+      </h3>
+      <p style="color: var(--text-secondary); font-size: 0.92rem;">
+        Use GitHub Releases for important permanent archives + Google Drive for quick sharing.
+        All permanent links you save here are stored in your browser’s localStorage so they stay even after refresh.
+      </p>
+    </div>
+  </section>
+
+  <footer>
+    <p>
+      FileVault • Free permanent storage powered by GitHub + Google Drive<br />
+      Light/Dark theme • Permanent link manager • Deploy to GitHub Pages for multi-device access
+    </p>
+  </footer>
+
+  <!-- Toast -->
+  <div class="toast" id="toast">
+    <i class="fas fa-check-circle"></i>
+    <span id="toastMsg">Success</span>
+  </div>
+
+  <script>
+    /* ========== THEME ========== */
+    const html = document.documentElement;
+    const themeToggle = document.getElementById('themeToggle');
+
+    function getPreferredTheme() {
+      const saved = localStorage.getItem('filevault_theme');
+      if (saved) return saved;
+      return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+    }
+
+    function setTheme(theme) {
+      html.setAttribute('data-theme', theme);
+      localStorage.setItem('filevault_theme', theme);
+    }
+
+    setTheme(getPreferredTheme());
+
+    themeToggle.addEventListener('click', () => {
+      const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      setTheme(next);
+    });
+
+    /* ========== TABS ========== */
+    function switchTab(tab) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + tab));
+    }
+
+    /* ========== LOCAL FILES ========== */
+    const STORAGE_KEY = 'filevault_files';
+    const LINKS_KEY = 'filevault_links';
+
+    let files = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    let permanentLinks = JSON.parse(localStorage.getItem(LINKS_KEY) || '[]');
+
+    const uploadZone = document.getElementById('uploadZone');
+    const fileInput = document.getElementById('fileInput');
+    const fileList = document.getElementById('fileList');
+    const emptyState = document.getElementById('emptyState');
+    const fileCount = document.getElementById('fileCount');
+    const progressBar = document.getElementById('progressBar');
+    const progressFill = document.getElementById('progressFill');
+
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(ev => {
+      uploadZone.addEventListener(ev, e => { e.preventDefault(); e.stopPropagation(); });
+    });
+    ['dragenter', 'dragover'].forEach(ev => uploadZone.addEventListener(ev, () => uploadZone.classList.add('dragover')));
+    ['dragleave', 'drop'].forEach(ev => uploadZone.addEventListener(ev, () => uploadZone.classList.remove('dragover')));
+
+    uploadZone.addEventListener('drop', e => handleFiles(e.dataTransfer.files));
+    uploadZone.addEventListener('click', e => {
+      if (!e.target.closest('button')) fileInput.click();
+    });
+    fileInput.addEventListener('change', () => {
+      handleFiles(fileInput.files);
+      fileInput.value = '';
+    });
+
+    function handleFiles(list) {
+      const arr = Array.from(list);
+      if (!arr.length) return;
+
+      progressBar.classList.add('active');
+      let p = 0;
+      const iv = setInterval(() => {
+        p += 14;
+        progressFill.style.width = Math.min(p, 100) + '%';
+        if (p >= 100) {
+          clearInterval(iv);
+          setTimeout(() => {
+            progressBar.classList.remove('active');
+            progressFill.style.width = '0%';
+          }, 350);
+        }
+      }, 70);
+
+      arr.forEach(file => {
+        files.unshift({
+          id: Date.now() + Math.random().toString(36).slice(2),
+          name: file.name,
+          size: formatSize(file.size),
+          type: getFileType(file.name),
+          date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+          url: URL.createObjectURL(file)
+        });
+      });
+
+      saveFiles();
+      renderFiles();
+      showToast(arr.length + ' file(s) added', 'success');
+    }
+
+    function getFileType(name) {
+      const ext = (name.split('.').pop() || '').toLowerCase();
+      if (['pdf'].includes(ext)) return 'pdf';
+      if (['doc', 'docx', 'txt', 'md', 'rtf', 'odt'].includes(ext)) return 'doc';
+      if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp'].includes(ext)) return 'img';
+      if (['mp4', 'mov', 'avi', 'mkv', 'webm'].includes(ext)) return 'video';
+      if (['zip', 'rar', '7z', 'tar', 'gz'].includes(ext)) return 'zip';
+      return 'other';
+    }
+
+    function formatSize(bytes) {
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+      if (bytes < 1073741824) return (bytes / 1048576).toFixed(1) + ' MB';
+      return (bytes / 1073741824).toFixed(2) + ' GB';
+    }
+
+    function getIcon(type) {
+      return {
+        pdf: 'fa-file-pdf',
+        doc: 'fa-file-word',
+        img: 'fa-file-image',
+        video: 'fa-file-video',
+        zip: 'fa-file-archive',
+        link: 'fa-link',
+        other: 'fa-file'
+      }[type] || 'fa-file';
+    }
+
+    function renderFiles() {
+      fileCount.textContent = files.length + (files.length === 1 ? ' file' : ' files');
+      if (files.length === 0) {
+        fileList.innerHTML = '';
+        emptyState.style.display = 'block';
+        fileList.appendChild(emptyState);
+        return;
+      }
+      emptyState.style.display = 'none';
+      fileList.innerHTML = files.map(f => `
+        <div class="file-item">
+          <div class="file-icon ${f.type}"><i class="fas ${getIcon(f.type)}"></i></div>
+          <div class="file-info">
+            <div class="file-name" title="${escapeHtml(f.name)}">${escapeHtml(f.name)}</div>
+            <div class="file-meta">${f.size} • ${f.date}</div>
+          </div>
+          <div class="file-actions">
+            <button class="action-btn download" title="Download" onclick="downloadFile('${f.id}')"><i class="fas fa-download"></i></button>
+            <button class="action-btn" title="Copy name" onclick="copyText('${escapeHtml(f.name)}')"><i class="fas fa-copy"></i></button>
+            <button class="action-btn delete" title="Remove" onclick="removeFile('${f.id}')"><i class="fas fa-trash"></i></button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function downloadFile(id) {
+      const f = files.find(x => x.id === id);
+      if (!f) return;
+      const a = document.createElement('a');
+      a.href = f.url;
+      a.download = f.name;
+      a.click();
+      showToast('Download started', 'success');
+    }
+
+    function removeFile(id) {
+      files = files.filter(f => f.id !== id);
+      saveFiles();
+      renderFiles();
+      showToast('File removed', 'success');
+    }
+
+    function saveFiles() {
+      const meta = files.map(({ id, name, size, type, date }) => ({ id, name, size, type, date }));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(meta));
+    }
+
+    /* ========== PERMANENT LINKS ========== */
+    function addPermanentLink() {
+      const name = document.getElementById('linkName').value.trim();
+      const url = document.getElementById('linkUrl').value.trim();
+      const source = document.getElementById('linkSource').value;
+      const notes = document.getElementById('linkNotes').value.trim();
+
+      if (!name) {
+        showToast('Please enter a file name', 'error');
+        return;
+      }
+      if (!url || !isValidUrl(url)) {
+        showToast('Please enter a valid URL', 'error');
+        return;
+      }
+
+      permanentLinks.unshift({
+        id: Date.now() + Math.random().toString(36).slice(2),
+        name,
+        url,
+        source,
+        notes,
+        date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+      });
+
+      saveLinks();
+      renderLinks();
+      clearLinkForm();
+      showToast('Permanent link saved!', 'success');
+    }
+
+    function isValidUrl(str) {
+      try {
+        const u = new URL(str);
+        return u.protocol === 'http:' || u.protocol === 'https:';
+      } catch {
+        return false;
+      }
+    }
+
+    function clearLinkForm() {
+      document.getElementById('linkName').value = '';
+      document.getElementById('linkUrl').value = '';
+      document.getElementById('linkNotes').value = '';
+      document.getElementById('linkSource').value = 'github';
+    }
+
+    function renderLinks() {
+      const linkCount = document.getElementById('linkCount');
+      const linkList = document.getElementById('linkList');
+      const linkEmpty = document.getElementById('linkEmpty');
+
+      linkCount.textContent = permanentLinks.length + (permanentLinks.length === 1 ? ' link' : ' links');
+
+      if (permanentLinks.length === 0) {
+        linkList.innerHTML = '';
+        linkEmpty.style.display = 'block';
+        linkList.appendChild(linkEmpty);
+        return;
+      }
+
+      linkEmpty.style.display = 'none';
+      linkList.innerHTML = permanentLinks.map(l => {
+        const sourceLabel = l.source === 'github' ? 'GitHub' : l.source === 'gdrive' ? 'Google Drive' : 'Other';
+        const sourceIcon = l.source === 'github' ? 'fab fa-github' : l.source === 'gdrive' ? 'fab fa-google-drive' : 'fas fa-globe';
+        return `
+          <div class="file-item">
+            <div class="file-icon link"><i class="${sourceIcon}"></i></div>
+            <div class="file-info">
+              <div class="file-name" title="${escapeHtml(l.name)}">${escapeHtml(l.name)}</div>
+              <div class="file-meta">${sourceLabel} • ${l.date}${l.notes ? ' • ' + escapeHtml(l.notes) : ''}</div>
+            </div>
+            <div class="file-actions">
+              <button class="action-btn open" title="Open link" onclick="openLink('${escapeHtml(l.url)}')"><i class="fas fa-external-link-alt"></i></button>
+              <button class="action-btn" title="Copy URL" onclick="copyText('${escapeHtml(l.url)}')"><i class="fas fa-copy"></i></button>
+              <button class="action-btn delete" title="Remove" onclick="removeLink('${l.id}')"><i class="fas fa-trash"></i></button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function openLink(url) {
+      window.open(url, '_blank', 'noopener');
+    }
+
+    function removeLink(id) {
+      permanentLinks = permanentLinks.filter(l => l.id !== id);
+      saveLinks();
+      renderLinks();
+      showToast('Link removed', 'success');
+    }
+
+    function saveLinks() {
+      localStorage.setItem(LINKS_KEY, JSON.stringify(permanentLinks));
+    }
+
+    /* ========== UTILS ========== */
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function copyText(text) {
+      navigator.clipboard.writeText(text).then(() => showToast('Copied!', 'success'));
+    }
+
+    function showToast(msg, type = 'success') {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toastMsg');
+      toastMsg.textContent = msg;
+      toast.className = 'toast ' + type + ' show';
+      const icon = toast.querySelector('i');
+      icon.className = type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-circle';
+      setTimeout(() => toast.classList.remove('show'), 2800);
+    }
+
+    function copyCode(btn) {
+      const code = btn.parentElement.querySelector('code').textContent;
+      navigator.clipboard.writeText(code).then(() => {
+        btn.textContent = 'Copied!';
+        setTimeout(() => btn.textContent = 'Copy', 1800);
+      });
+    }
+
+    /* Init */
+    renderFiles();
+    renderLinks();
+
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+      a.addEventListener('click', e => {
+        e.preventDefault();
+        const t = document.querySelector(a.getAttribute('href'));
+        if (t) t.scrollIntoView({ behavior: 'smooth' });
+      });
+    });
+  </script>
+</body>
+</html>
 
